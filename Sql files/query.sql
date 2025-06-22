@@ -2,6 +2,17 @@ CREATE DATABASE IF NOT EXISTS inventory_forecasting;
 USE inventory_forecasting;
 
 -- =============================
+-- Drop tables if they already exist (to avoid duplicate errors)
+-- =============================
+DROP TABLE IF EXISTS Pricing;
+DROP TABLE IF EXISTS Inventory;
+DROP TABLE IF EXISTS Calendar;
+DROP TABLE IF EXISTS Store;
+DROP TABLE IF EXISTS Product;
+DROP TABLE IF EXISTS Region;
+DROP TABLE IF EXISTS Category;
+
+-- =============================
 -- Category Dimension Table
 -- =============================
 CREATE TABLE Category (
