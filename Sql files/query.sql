@@ -1,6 +1,5 @@
 -- ABC ANALYSIS - Product Classification by Revenue Impact
 
--- ABC Analysis for Strategic Inventory Classification
 -- ABC analysis is fundamental for inventory optimization, categorizing products based 
 -- on their revenue contribution following the Pareto principle. The analysis classifies 
 -- inventory into three categories: "A" items contributing approximately 80% of revenue, 
