@@ -50,9 +50,22 @@ CREATE TABLE Inventory (
 -- ============================
 -- Calendar Dimension Table
 -- ============================
-CREATE TABLE Calendar (
+CREATE TABLE Season (
     date DATE PRIMARY KEY,                   -- Date acts as primary key for calendar
-    weather_condition VARCHAR(20),           -- Weather effect on sales (Sunny, Rainy, etc.)
-    holiday_promotion BOOLEAN,               -- Whether a holiday/promo was active
     seasonality VARCHAR(20)                  -- Season (Winter, Summer, etc.)
 );
+
+-- ============================
+-- Weather Dimension Table
+-- ============================
+CREATE TABLE Calendar (
+    date DATE PRIMARY KEY,                   -- Date acts as primary key for calendar
+    store_id VARCHAR(10),
+    product_id VARCHAR(10),
+    weather_condition VARCHAR(20),
+    Holiday BOOLEAN,   
+    PRIMARY KEY (date, store_id, product_id),    -- Composite key to maintain granularity
+    FOREIGN KEY (store_id) REFERENCES Store(store_id),
+    FOREIGN KEY (product_id) REFERENCES Product(product_id)
+);
+
