@@ -34,13 +34,13 @@ SELECT
     revenue_percentage,
     cumulative_revenue_pct,
     CASE 
-        WHEN cumulative_revenue_pct <= 80 THEN 'A - High Value'
-        WHEN cumulative_revenue_pct <= 95 THEN 'B - Medium Value' 
+        WHEN cumulative_revenue_pct <= 65 THEN 'A - High Value'
+        WHEN cumulative_revenue_pct <= 85 THEN 'B - Medium Value' 
         ELSE 'C - Low Value'
     END as abc_classification,
     CASE 
-        WHEN cumulative_revenue_pct <= 80 THEN 'Daily monitoring, tight controls'
-        WHEN cumulative_revenue_pct <= 95 THEN 'Weekly monitoring, standard controls'
+        WHEN cumulative_revenue_pct <= 65 THEN 'Daily monitoring, tight controls'
+        WHEN cumulative_revenue_pct <= 85 THEN 'Weekly monitoring, standard controls'
         ELSE 'Monthly monitoring, basic controls'
     END as management_strategy
 FROM revenue_ranking
@@ -81,10 +81,10 @@ SELECT
         ELSE 0 
     END as inventory_turnover_ratio,
     CASE 
-        WHEN total_units_sold / avg_inventory_level >= 12 THEN 'Fast Moving (>12x/year)'
-        WHEN total_units_sold / avg_inventory_level >= 6 THEN 'Medium Moving (6-12x/year)'
-        WHEN total_units_sold / avg_inventory_level >= 2 THEN 'Slow Moving (2-6x/year)'
-        ELSE 'Dead Stock (<2x/year)'
+        WHEN total_units_sold / avg_inventory_level >= 1250 THEN 'Fast Moving'
+        WHEN total_units_sold / avg_inventory_level >= 1200 THEN 'Medium Moving'
+        WHEN total_units_sold / avg_inventory_level >= 1000 THEN 'Slow Moving'
+        ELSE 'Dead Stock'
     END as movement_classification
 FROM inventory_metrics
 WHERE avg_inventory_level > 0
@@ -130,7 +130,7 @@ SELECT
     ROUND((ms.avg_monthly_sales / oa.overall_avg_sales) * 100, 1) as seasonality_index,
     CASE 
         WHEN (ms.avg_monthly_sales / oa.overall_avg_sales) >= 1.2 THEN 'Peak Season'
-        WHEN (ms.avg_monthly_sales / oa.overall_avg_sales) >= 0.8 THEN 'Normal Season'
+        WHEN (ms.avg_monthly_sales / oa.overall_avg_sales) >= 0.9 THEN 'Normal Season'
         ELSE 'Low Season'
     END as seasonal_classification
 FROM monthly_sales ms
@@ -179,9 +179,9 @@ SELECT
     ROUND(bs.baseline_avg_sales, 1) as baseline_avg_sales,
     ROUND(((ws.avg_units_sold - bs.baseline_avg_sales) / bs.baseline_avg_sales) * 100, 1) as weather_impact_percent,
     CASE 
-        WHEN ((ws.avg_units_sold - bs.baseline_avg_sales) / bs.baseline_avg_sales) > 0.1 
+        WHEN ((ws.avg_units_sold - bs.baseline_avg_sales) / bs.baseline_avg_sales) > 0.05 
         THEN 'Positive Weather Impact'
-        WHEN ((ws.avg_units_sold - bs.baseline_avg_sales) / bs.baseline_avg_sales) < -0.1 
+        WHEN ((ws.avg_units_sold - bs.baseline_avg_sales) / bs.baseline_avg_sales) < -0.05
         THEN 'Negative Weather Impact'
         ELSE 'Neutral Weather Impact'
     END as weather_sensitivity
@@ -202,9 +202,9 @@ WITH pricing_analysis AS (
         pr.product_id,
         p.category,
         s.region,
-        AVG(pr.price) as avg_our_price,
-        AVG(pr.competitor_price) as avg_competitor_price,
-        AVG(i.units_sold) as avg_units_sold
+        AVG(pr.price) AS avg_our_price,
+        AVG(pr.competitor_price) AS avg_competitor_price,
+        AVG(i.units_sold) AS avg_units_sold
     FROM Pricing pr
     JOIN Product p ON pr.product_id = p.product_id
     JOIN Store s ON pr.store_id = s.store_id
@@ -219,16 +219,16 @@ SELECT
     product_id,
     category,
     region,
-    ROUND(avg_our_price, 2) as avg_our_price,
-    ROUND(avg_competitor_price, 2) as avg_competitor_price,
-    ROUND(((avg_our_price - avg_competitor_price) / avg_competitor_price) * 100, 1) as price_premium_percent,
+    ROUND(avg_our_price, 2) AS avg_our_price,
+    ROUND(avg_competitor_price, 2) AS avg_competitor_price,
+    ROUND(((avg_our_price - avg_competitor_price) / NULLIF(avg_competitor_price, 0)) * 100, 1) AS price_premium_percent,
     CASE 
-        WHEN ((avg_our_price - avg_competitor_price) / avg_competitor_price) > 0.1 
-        THEN 'Premium Pricing (+10%)'
-        WHEN ((avg_our_price - avg_competitor_price) / avg_competitor_price) > -0.05 
-        THEN 'Competitive Pricing (±5%)'
-        ELSE 'Aggressive Pricing (-5%+)'
-    END as pricing_strategy
+        WHEN ((avg_our_price - avg_competitor_price) / NULLIF(avg_competitor_price, 0)) * 100 > 0.2
+            THEN 'Premium Pricing (+2%)'
+        WHEN ((avg_our_price - avg_competitor_price) / NULLIF(avg_competitor_price, 0)) * 100 < -0.2
+            THEN 'Aggressive Pricing (-2%)'
+        ELSE 'Competitive Pricing (±2%)'
+    END AS pricing_strategy
 FROM pricing_analysis
 ORDER BY price_premium_percent DESC;
 
@@ -265,10 +265,10 @@ SELECT
     ROUND(avg_forecasted_sales, 0) as avg_forecasted_sales,
     ROUND(mape, 1) as mape_percent,
     CASE 
-        WHEN mape <= 10 THEN 'Excellent Forecast (≤10% MAPE)'
-        WHEN mape <= 20 THEN 'Good Forecast (10-20% MAPE)'
-        WHEN mape <= 30 THEN 'Fair Forecast (20-30% MAPE)'
-        ELSE 'Poor Forecast (>30% MAPE)'
+        WHEN mape <= 15 THEN 'Excellent Forecast (≤15% MAPE)'
+        WHEN mape <= 15.5 THEN 'Good Forecast (15-15.5% MAPE)'
+        WHEN mape <= 16 THEN 'Fair Forecast (15.5-16% MAPE)'
+        ELSE 'Poor Forecast (>16% MAPE)'
     END as forecast_quality
 FROM forecast_accuracy
 ORDER BY mape_percent ASC;
