@@ -1,3 +1,4 @@
+-- Remove Executive Summary Dashboard view
 DROP VIEW IF EXISTS ExecutiveSummaryDashboard;
 
 -- Remove Monthly Performance Trends Dashboard view
